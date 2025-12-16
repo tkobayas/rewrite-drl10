@@ -3,7 +3,6 @@ package org.drools.rewrite.drl;
 import org.openrewrite.ExecutionContext;
 import org.openrewrite.Recipe;
 import org.openrewrite.TreeVisitor;
-import org.openrewrite.internal.StringUtils;
 import org.openrewrite.text.PlainText;
 import org.openrewrite.text.PlainTextVisitor;
 
@@ -17,7 +16,7 @@ import java.util.regex.Pattern;
  */
 public class PrefixCustomOperatorRecipe extends Recipe {
     private static final Set<String> BUILT_INS = Set.of(
-            "contains", "excludes", "matches", "memberOf", "soundslike", "str",
+            "contains", "excludes", "matches", "memberof", "soundslike", "str",
             "after", "before", "coincides", "during", "finishedby", "finishes",
             "includes", "meets", "metby", "overlappedby", "overlaps", "startedby", "starts"
     );
@@ -48,7 +47,7 @@ public class PrefixCustomOperatorRecipe extends Recipe {
             public PlainText visitText(PlainText text, ExecutionContext executionContext) {
                 String original = text.getText();
                 String rewritten = rewriteOperators(original);
-                if (StringUtils.equals(original, rewritten)) {
+                if (original.equals(rewritten)) {
                     return text;
                 }
                 return text.withText(rewritten);
@@ -63,13 +62,14 @@ public class PrefixCustomOperatorRecipe extends Recipe {
             String op = matcher.group("op");
             String lowerOp = op.toLowerCase();
             if (lowerOp.startsWith("##") || BUILT_INS.contains(lowerOp)) {
-                matcher.appendReplacement(sb, matcher.group(0));
+                matcher.appendReplacement(sb, Matcher.quoteReplacement(matcher.group(0)));
                 continue;
             }
             String lhs = matcher.group("lhs");
             String not = matcher.group("not") == null ? "" : matcher.group("not");
             String rhs = matcher.group("rhs");
-            String replacement = lhs + " " + not + "##" + op + " " + rhs;
+            String middle = not.isEmpty() ? " " + not : " ";
+            String replacement = lhs + middle + "##" + op + " " + rhs;
             matcher.appendReplacement(sb, Matcher.quoteReplacement(replacement));
         }
         matcher.appendTail(sb);

@@ -15,6 +15,8 @@ dependencies {
     implementation("org.openrewrite:rewrite-core")
     testImplementation(platform("org.openrewrite:rewrite-bom:8.68.1"))
     testImplementation("org.openrewrite:rewrite-test")
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     // ANTLR for DRL parsing.
     antlr("org.antlr:antlr4:4.13.2")

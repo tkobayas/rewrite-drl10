@@ -35,7 +35,7 @@ public class LhsLogicalOperatorRecipe extends Recipe {
             public PlainText visitText(PlainText text, ExecutionContext executionContext) {
                 String original = text.getText();
                 String rewritten = rewriteLhsLogical(original);
-                if (StringUtils.equals(original, rewritten)) {
+                if (original.equals(rewritten)) {
                     return text;
                 }
                 return text.withText(rewritten);

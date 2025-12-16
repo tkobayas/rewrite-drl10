@@ -10,5 +10,5 @@
 - [x] Set up standalone Gradle project with `rewrite-drl` module targeting OpenRewrite 8.68.1 (Java 17); ANTLR plugin wired and Drools DRL6 grammars copied into `rewrite-drl/src/main/antlr` for tolerant parsing.
 - [x] Implement recipe classes (grouped under a DRL10 migration recipe list) with visitors for each transformation. Added heuristic PlainText visitors for half-constraints, custom operator prefixing, and LHS logical infix replacement; composite `DrlMigrationRecipe` to apply them.
 - [ ] Revisit with AST/token-based recipes: replace regex heuristics by using the generated DRL6 parser with `TokenStreamRewriter` for precise edits (half-constraints, custom operator prefixing, LHS logical operator swaps).
-- [ ] Add focused tests with positive/negative cases ensuring formatting is preserved and output is DRL10-compatible.
+- [x] Add focused tests with positive/negative cases ensuring formatting is preserved and output is DRL10-compatible (plain-text rewrite tests covering each recipe and the composite).
 - [ ] Validate end-to-end on combined samples (optional DRL10 parse check) and adjust recipes as needed.

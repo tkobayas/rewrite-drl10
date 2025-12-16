@@ -2,6 +2,7 @@
 .gradle/
 build/
 */build/
+.gradle-user/
 
 # IntelliJ
 .idea/

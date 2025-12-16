@@ -48,7 +48,7 @@ public class HalfConstraintRecipe extends Recipe {
                 if (original.equals(rewritten)) {
                     return text;
                 }
-                return text.withText(rewritten).withMarkers(Markers.build());
+                return text.withText(rewritten);
             }
         };
     }
