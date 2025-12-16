@@ -12,6 +12,12 @@ build/
 rewrite-drl/src/main/antlr/*.tokens
 rewrite-drl/build/
 rewrite-drl/.antlr/
+rewrite-drl/target/
+target/
+.gradle/
+.gradle-user/
+.idea/
+*.iml
 
 # Logs
 *.log
