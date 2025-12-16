@@ -8,6 +8,7 @@
   - Custom operator: any binary restriction using a custom operator token parsed as bare `IDENTIFIER` (not built-in, not already prefixed) should be rewritten to `##<id>`. Leave built-in operators and already-prefixed `##foo` untouched. Maintain negated forms (`not <op>` → `not ##<op>`).
   - Logical infix: replace `&&`/`||` (tokens `AND`/`OR`) with textual `and`/`or` only for `lhsExpression` connections (pattern composition). Do not rewrite logical operators inside constraint expressions. Avoid touching Java code in RHS or string literals/comments/identifiers. Preserve spacing/parentheses.
 - [x] Set up standalone Gradle project with `rewrite-drl` module targeting OpenRewrite 8.68.1 (Java 17); ANTLR plugin wired and Drools DRL6 grammars copied into `rewrite-drl/src/main/antlr` for tolerant parsing.
-- [ ] Implement recipe classes (grouped under a DRL10 migration recipe list) with visitors for each transformation.
+- [x] Implement recipe classes (grouped under a DRL10 migration recipe list) with visitors for each transformation. Added heuristic PlainText visitors for half-constraints, custom operator prefixing, and LHS logical infix replacement; composite `DrlMigrationRecipe` to apply them.
+- [ ] Revisit with AST/token-based recipes: replace regex heuristics by using the generated DRL6 parser with `TokenStreamRewriter` for precise edits (half-constraints, custom operator prefixing, LHS logical operator swaps).
 - [ ] Add focused tests with positive/negative cases ensuring formatting is preserved and output is DRL10-compatible.
 - [ ] Validate end-to-end on combined samples (optional DRL10 parse check) and adjust recipes as needed.
