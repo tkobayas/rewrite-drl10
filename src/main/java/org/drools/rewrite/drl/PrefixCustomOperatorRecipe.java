@@ -18,12 +18,9 @@ public class PrefixCustomOperatorRecipe extends Recipe {
     private static final Set<String> BUILT_INS = Set.of(
             "contains", "excludes", "matches", "memberof", "soundslike", "str",
             "after", "before", "coincides", "during", "finishedby", "finishes",
-            "includes", "meets", "metby", "overlappedby", "overlaps", "startedby", "starts"
+            "includes", "meets", "metby", "overlappedby", "overlaps", "startedby", "starts",
+            "not", "and", "or"
     );
-
-    // Roughly matches "<lhs> [not] <op> <rhs>" where op is an identifier.
-    private static final Pattern CUSTOM_OP = Pattern.compile(
-            "(?<lhs>[A-Za-z_][\\w\\.]*)\\s+(?<not>not\\s+)?(?<op>[A-Za-z_][\\w]*)\\s+(?<rhs>[^;\\n]+)");
 
     @Override
     public String getDisplayName() {
@@ -79,24 +76,74 @@ public class PrefixCustomOperatorRecipe extends Recipe {
     }
 
     private static String rewriteWithinWhen(String block) {
-        Matcher matcher = CUSTOM_OP.matcher(block);
-        StringBuffer sb = new StringBuffer();
-        while (matcher.find()) {
-            String op = matcher.group("op");
-            String lowerOp = op.toLowerCase();
-            if (lowerOp.startsWith("##") || BUILT_INS.contains(lowerOp)) {
-                matcher.appendReplacement(sb, Matcher.quoteReplacement(matcher.group(0)));
+        Pattern ident = Pattern.compile("\\b([A-Za-z_][\\w]*)\\b");
+        Matcher m = ident.matcher(block);
+        boolean[] inString = markStringRegions(block);
+        StringBuilder sb = new StringBuilder(block);
+        int offset = 0;
+        while (m.find()) {
+            String op = m.group(1);
+            String lower = op.toLowerCase();
+            if (lower.startsWith("##") || BUILT_INS.contains(lower)) {
                 continue;
             }
-            String lhs = matcher.group("lhs");
-            String not = matcher.group("not") == null ? "" : matcher.group("not");
-            String rhs = matcher.group("rhs");
-            String middle = not.isEmpty() ? " " + not : " ";
-            String replacement = lhs + middle + "##" + op + " " + rhs;
-            matcher.appendReplacement(sb, Matcher.quoteReplacement(replacement));
+            int start = m.start(1) + offset;
+            int end = m.end(1) + offset;
+            if (m.start(1) < inString.length && inString[m.start(1)]) {
+                continue;
+            }
+            int prev = previousNonWhitespace(sb, start - 1);
+            int next = nextNonWhitespace(sb, end);
+            if (prev < 0 || next >= sb.length()) {
+                continue;
+            }
+            char prevCh = sb.charAt(prev);
+            char nextCh = sb.charAt(next);
+            if (!isOperandBoundary(prevCh) || !isOperandBoundaryStart(nextCh) || nextCh == '(') {
+                continue;
+            }
+            sb.insert(start, "##");
+            offset += 2;
         }
-        matcher.appendTail(sb);
         return sb.toString();
     }
 
+    private static boolean[] markStringRegions(String text) {
+        boolean[] inString = new boolean[text.length()];
+        boolean inside = false;
+        for (int i = 0; i < text.length(); i++) {
+            char ch = text.charAt(i);
+            if (ch == '"' && (i == 0 || text.charAt(i - 1) != '\\')) {
+                inside = !inside;
+            }
+            inString[i] = inside;
+        }
+        return inString;
+    }
+
+    private static int previousNonWhitespace(CharSequence s, int idx) {
+        for (int i = idx; i >= 0; i--) {
+            if (!Character.isWhitespace(s.charAt(i))) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private static int nextNonWhitespace(CharSequence s, int idx) {
+        for (int i = idx; i < s.length(); i++) {
+            if (!Character.isWhitespace(s.charAt(i))) {
+                return i;
+            }
+        }
+        return s.length();
+    }
+
+    private static boolean isOperandBoundary(char ch) {
+        return Character.isLetterOrDigit(ch) || ch == '"' || ch == ')' || ch == ']' || ch == '$' || ch == '_';
+    }
+
+    private static boolean isOperandBoundaryStart(char ch) {
+        return Character.isLetterOrDigit(ch) || ch == '"' || ch == '(' || ch == '$' || ch == '_';
+    }
 }

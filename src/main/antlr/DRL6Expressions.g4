@@ -716,11 +716,11 @@ in_key
 
 operator_key
   // IDENTIFIER is required to accept custom operators. We need to keep this semantic predicate for custom operators
-  :       id=IDENTIFIER 
+  :      prefix=DRL10_CUSTOM_OPERATOR_PREFIX? id=IDENTIFIER
   |      op=builtInOperator
   ;
 
 neg_operator_key
-  :      id=IDENTIFIER
+  :      prefix=DRL10_CUSTOM_OPERATOR_PREFIX? id=IDENTIFIER
   |      op=builtInOperator
   ;

@@ -1,17 +1,15 @@
 package org.drools.rewrite.drl.ast;
 
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenStreamRewriter;
-import org.antlr.v4.runtime.misc.Interval;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.antlr.v4.runtime.tree.TerminalNode;
+import org.drools.rewrite.drl.antlr.DRLParser;
+import org.drools.rewrite.drl.antlr.DRLParserBaseListener;
 import org.openrewrite.ExecutionContext;
 import org.openrewrite.TreeVisitor;
 
 import java.time.Duration;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.List;
 
 /**
  * Token-based replacement of &&/|| with and/or in LHS pattern composition, skipping RHS and constraint expressions.
@@ -35,68 +33,28 @@ public class AstLhsLogicalOperatorRecipe extends BaseAstDrlRecipe {
 
     @Override
     public TreeVisitor<?, ExecutionContext> getVisitor() {
-        return visitor(source -> rewriteWithTokens(source, this::process));
+        return visitor(source -> rewriteWithParser(source, this::process));
     }
 
-    private void process(CommonTokenStream tokens, TokenStreamRewriter rewriter) {
-        for (Interval span : whenThenSpans(tokens)) {
-            Deque<Integer> argStack = new ArrayDeque<>();
-            int parenDepth = 0;
-            for (int i = span.a; i <= span.b; i++) {
-                Token t = tokens.get(i);
-                String text = t.getText();
-                if ("(".equals(text)) {
-                    parenDepth++;
-                    Token prev = previousDefault(tokens, i, span.a);
-                    if (prev != null && Character.isLetterOrDigit(prev.getText().charAt(prev.getText().length() - 1))) {
-                        argStack.push(parenDepth);
+    private void process(DRLParser parser, DRLParser.CompilationUnitContext cu, CommonTokenStream tokens, TokenStreamRewriter rewriter) {
+        ParseTreeWalker.DEFAULT.walk(new DRLParserBaseListener() {
+            @Override
+            public void enterLhsOr(DRLParser.LhsOrContext ctx) {
+                for (TerminalNode or : ctx.OR()) {
+                    if ("||".equals(or.getText())) {
+                        rewriter.replace(or.getSymbol(), "or");
                     }
-                } else if (")".equals(text)) {
-                    if (!argStack.isEmpty() && argStack.peek() == parenDepth) {
-                        argStack.pop();
+                }
+            }
+
+            @Override
+            public void enterLhsAnd(DRLParser.LhsAndContext ctx) {
+                for (TerminalNode and : ctx.AND()) {
+                    if ("&&".equals(and.getText())) {
+                        rewriter.replace(and.getSymbol(), "and");
                     }
-                    parenDepth = Math.max(0, parenDepth - 1);
-                } else if ("&&".equals(text) && argStack.isEmpty()) {
-                    rewriter.replace(t, "and");
-                } else if ("||".equals(text) && argStack.isEmpty()) {
-                    rewriter.replace(t, "or");
                 }
             }
-        }
-    }
-
-    private static Token previousDefault(CommonTokenStream tokens, int idx, int lowerBound) {
-        for (int i = idx - 1; i >= lowerBound; i--) {
-            Token t = tokens.get(i);
-            if (t.getChannel() == Token.DEFAULT_CHANNEL) {
-                return t;
-            }
-        }
-        return null;
-    }
-
-    private static List<Interval> whenThenSpans(CommonTokenStream tokens) {
-        List<Interval> spans = new ArrayList<>();
-        List<? extends Token> all = tokens.getTokens();
-        int i = 0;
-        while (i < all.size()) {
-            Token t = all.get(i);
-            if ("when".equalsIgnoreCase(t.getText())) {
-                int start = i;
-                int j = i + 1;
-                while (j < all.size() && !"then".equalsIgnoreCase(all.get(j).getText())) {
-                    j++;
-                }
-                if (j < all.size()) {
-                    spans.add(new Interval(start + 1, j - 1));
-                    i = j;
-                    continue;
-                } else {
-                    break;
-                }
-            }
-            i++;
-        }
-        return spans;
+        }, cu);
     }
 }

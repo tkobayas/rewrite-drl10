@@ -50,36 +50,35 @@ public class AstPrefixCustomOperatorRecipe extends BaseAstDrlRecipe {
         ParseTreeWalker.DEFAULT.walk(new DRLParserBaseListener() {
             @Override
             public void enterOperator_key(DRLParser.Operator_keyContext ctx) {
-                if (!isInLhs(ctx)) {
-                    return;
-                }
                 Token id = ctx.IDENTIFIER() != null ? ctx.IDENTIFIER().getSymbol() : null;
                 if (id == null) {
                     return;
                 }
-                String text = id.getText();
-                if (text.startsWith("##")) {
+                if (ctx.prefix != null) { // already has ## prefix
                     return;
                 }
+                String text = id.getText();
+                if (BUILT_INS.contains(text.toLowerCase())) {
+                    return;
+                }
+                rewriter.insertBefore(id, "##");
+            }
+
+            @Override
+            public void enterNeg_operator_key(DRLParser.Neg_operator_keyContext ctx) {
+                Token id = ctx.IDENTIFIER() != null ? ctx.IDENTIFIER().getSymbol() : null;
+                if (id == null) {
+                    return;
+                }
+                if (ctx.prefix != null) { // already has ## prefix
+                    return;
+                }
+                String text = id.getText();
                 if (BUILT_INS.contains(text.toLowerCase())) {
                     return;
                 }
                 rewriter.insertBefore(id, "##");
             }
         }, cu);
-    }
-
-    private static boolean isInLhs(ParserRuleContext ctx) {
-        ParserRuleContext cursor = ctx;
-        while (cursor != null) {
-            if (cursor instanceof DRLParser.LhsContext || cursor instanceof DRLParser.LhsExpressionContext) {
-                return true;
-            }
-            if (cursor instanceof DRLParser.RhsContext) {
-                return false;
-            }
-            cursor = cursor.getParent();
-        }
-        return false;
     }
 }

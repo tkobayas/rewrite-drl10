@@ -103,6 +103,30 @@ class DrlMigrationRecipesTest implements RewriteTest {
 
     @ParameterizedTest
     @MethodSource("customOperatorRecipes")
+    void prefixesNegativeCustomOperator(Recipe toApply) {
+        rewriteRun(
+                spec -> spec.recipe(toApply),
+                text(
+                        """
+                        rule R
+                        when
+                            Person(addresses not supersetOf $alice.addresses)
+                        then
+                        end
+                        """,
+                        """
+                        rule R
+                        when
+                            Person(addresses not ##supersetOf $alice.addresses)
+                        then
+                        end
+                        """
+                )
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("customOperatorRecipes")
     void prefixesCustomOperatorComplex(Recipe toApply) {
         rewriteRun(
                 spec -> spec.recipe(toApply),
@@ -111,7 +135,7 @@ class DrlMigrationRecipesTest implements RewriteTest {
                         rule R
                         when
                             Person(addresses supersetOf $alice.addresses,
-                                   orders subsetOf $bob.orders)
+                                   orders not subsetOf $bob.orders)
                         then
                         end
                         """,
@@ -119,7 +143,7 @@ class DrlMigrationRecipesTest implements RewriteTest {
                         rule R
                         when
                             Person(addresses ##supersetOf $alice.addresses,
-                                   orders ##subsetOf $bob.orders)
+                                   orders not ##subsetOf $bob.orders)
                         then
                         end
                         """
