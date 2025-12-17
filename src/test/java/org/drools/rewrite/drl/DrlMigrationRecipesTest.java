@@ -132,14 +132,14 @@ class DrlMigrationRecipesTest implements RewriteTest {
                         """
                         rule R
                         when
-                            Person(name == "Mark" || == "Mario") && (addresses supersetOf $alice.addresses)
+                            Person(name == "Mark" || == "Mario") || Person(addresses supersetOf $alice.addresses)
                         then
                         end
                         """,
                         """
                         rule R
                         when
-                            Person(name == "Mark" || name == "Mario") and (addresses ##supersetOf $alice.addresses)
+                            Person(name == "Mark" || name == "Mario") or Person(addresses ##supersetOf $alice.addresses)
                         then
                         end
                         """

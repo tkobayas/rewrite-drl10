@@ -113,6 +113,7 @@ public class LhsLogicalOperatorRecipe extends Recipe {
         char nextChar = text.charAt(next);
         // Pattern connectors usually precede a type name (capitalized) or an opening paren wrapping patterns.
         boolean nextLooksLikePattern = Character.isUpperCase(nextChar) ||
+                nextChar == '(' || // allow grouped patterns regardless of case inside
                 (nextChar == '(' && (next + 1 < text.length() && Character.isUpperCase(text.charAt(next + 1)))) ||
                 nextChar == '?'; // inline query ?Foo()
         return nextLooksLikePattern;

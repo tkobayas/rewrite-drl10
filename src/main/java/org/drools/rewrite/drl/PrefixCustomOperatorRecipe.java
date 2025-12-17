@@ -56,7 +56,30 @@ public class PrefixCustomOperatorRecipe extends Recipe {
     }
 
     private static String rewriteOperators(String source) {
-        Matcher matcher = CUSTOM_OP.matcher(source);
+        StringBuilder out = new StringBuilder();
+        int idx = 0;
+        while (true) {
+            int whenIdx = indexOfWord(source, "when", idx);
+            if (whenIdx < 0) {
+                out.append(source.substring(idx));
+                break;
+            }
+            int thenIdx = indexOfWord(source, "then", whenIdx);
+            if (thenIdx < 0) {
+                out.append(source.substring(idx));
+                break;
+            }
+            // Copy up to and including "when"
+            out.append(source, idx, whenIdx + 4);
+            String lhsBlock = source.substring(whenIdx + 4, thenIdx);
+            out.append(rewriteWithinWhen(lhsBlock));
+            idx = thenIdx;
+        }
+        return out.toString();
+    }
+
+    private static String rewriteWithinWhen(String block) {
+        Matcher matcher = CUSTOM_OP.matcher(block);
         StringBuffer sb = new StringBuffer();
         while (matcher.find()) {
             String op = matcher.group("op");
@@ -74,5 +97,16 @@ public class PrefixCustomOperatorRecipe extends Recipe {
         }
         matcher.appendTail(sb);
         return sb.toString();
+    }
+
+    private static int indexOfWord(String text, String word, int fromIndex) {
+        int idx = text.toLowerCase().indexOf(word.toLowerCase(), fromIndex);
+        if (idx < 0) {
+            return -1;
+        }
+        boolean startOk = idx == 0 || !Character.isLetterOrDigit(text.charAt(idx - 1));
+        int endIdx = idx + word.length();
+        boolean endOk = endIdx >= text.length() || !Character.isLetterOrDigit(text.charAt(endIdx));
+        return (startOk && endOk) ? idx : -1;
     }
 }
