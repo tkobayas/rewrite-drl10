@@ -11,4 +11,4 @@
 - [x] Implement recipe classes (grouped under a DRL10 migration recipe list) with visitors for each transformation. Added heuristic PlainText visitors for half-constraints, custom operator prefixing, and LHS logical infix replacement; composite `DrlMigrationRecipe` to apply them.
 - [ ] Revisit with AST/token-based recipes: replace regex heuristics by using the generated DRL6 parser with `TokenStreamRewriter` for precise edits (half-constraints, custom operator prefixing, LHS logical operator swaps).
 - [x] Add focused tests with positive/negative cases ensuring formatting is preserved and output is DRL10-compatible (plain-text rewrite tests covering each recipe and the composite).
-- [ ] Validate end-to-end on combined samples (optional DRL10 parse check) and adjust recipes as needed.
+- [x] Validate end-to-end on combined samples (optional DRL10 parse check) and adjust recipes as needed. Current: all rewrite tests (including complex cases) pass under Maven; further DRL10 parser validation still recommended later.

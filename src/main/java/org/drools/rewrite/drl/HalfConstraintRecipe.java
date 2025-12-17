@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 public class HalfConstraintRecipe extends Recipe {
     // Matches "<lhs> <op> <rhs> <logical> <op> <rhs2>" with missing lhs in the second comparison.
     private static final Pattern HALF_CONSTRAINT = Pattern.compile(
-            "(?<lhs>[A-Za-z_][\\w\\.]*)\\s*(?<op>==|!=|<=|>=|<|>)\\s*(?<rhs1>[^|&;\\n,]+?)\\s*(?<logical>\\|\\||\\bor\\b)\\s*(?<halfop>==|!=|<=|>=|<|>)\\s*(?<rhs2>[^|&;\\n,]+)",
+            "(?<lhs>[A-Za-z_][\\w\\.]*)\\s*(?<op>==|!=|<=|>=|<|>|##?[A-Za-z_][\\w]*)\\s*(?<rhs1>[^|&;\\n,]+?)\\s*(?<logical>\\|\\||\\bor\\b)\\s*(?<halfop>==|!=|<=|>=|<|>)\\s*(?<rhs2>[^|&;\\n,]+)",
             Pattern.CASE_INSENSITIVE);
 
     @Override
