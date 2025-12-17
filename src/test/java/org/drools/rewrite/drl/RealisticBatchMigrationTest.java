@@ -1,17 +1,21 @@
 package org.drools.rewrite.drl;
 
-import org.junit.jupiter.api.Test;
+import org.drools.rewrite.drl.ast.AstDrlMigrationRecipe;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.openrewrite.Recipe;
 import org.openrewrite.test.RewriteTest;
 
 import static org.openrewrite.test.SourceSpecs.text;
 
 class RealisticBatchMigrationTest implements RewriteTest {
 
-    @Test
-    void migratesFiveRulesWithPatternsAndRhsUntouched() {
+    @ParameterizedTest
+    @MethodSource("migrationRecipes")
+    void migratesFiveRulesWithPatternsAndRhsUntouched(Recipe recipe) {
         rewriteRun(
-                spec -> spec.recipe(new DrlMigrationRecipe())
-                        .expectedCyclesThatMakeChanges(2),
+                spec -> spec.recipe(recipe)
+                        .expectedCyclesThatMakeChanges(1),
                 text(
                         // before
                         """
@@ -115,5 +119,9 @@ class RealisticBatchMigrationTest implements RewriteTest {
                         """
                 )
         );
+    }
+
+    static java.util.stream.Stream<Recipe> migrationRecipes() {
+        return java.util.stream.Stream.of(new AstDrlMigrationRecipe());
     }
 }

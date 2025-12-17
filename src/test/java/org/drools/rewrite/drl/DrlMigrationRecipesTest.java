@@ -1,16 +1,20 @@
 package org.drools.rewrite.drl;
 
-import org.junit.jupiter.api.Test;
+import org.drools.rewrite.drl.ast.AstDrlMigrationRecipe;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.openrewrite.Recipe;
 import org.openrewrite.test.RewriteTest;
 
 import static org.openrewrite.test.SourceSpecs.text;
 
 class DrlMigrationRecipesTest implements RewriteTest {
 
-    @Test
-    void halfConstraintFilled() {
+    @ParameterizedTest
+    @MethodSource("halfConstraintRecipes")
+    void halfConstraintFilled(Recipe toApply) {
         rewriteRun(
-                spec -> spec.recipe(new HalfConstraintRecipe()),
+                spec -> spec.recipe(toApply),
                 text(
                         """
                         rule R
@@ -30,10 +34,11 @@ class DrlMigrationRecipesTest implements RewriteTest {
         );
     }
 
-    @Test
-    void halfConstraintComplex() {
+    @ParameterizedTest
+    @MethodSource("halfConstraintRecipes")
+    void halfConstraintComplex(Recipe toApply) {
         rewriteRun(
-                spec -> spec.recipe(new HalfConstraintRecipe()),
+                spec -> spec.recipe(toApply),
                 text(
                         """
                         rule R
@@ -55,10 +60,11 @@ class DrlMigrationRecipesTest implements RewriteTest {
         );
     }
 
-    @Test
-    void halfConstraintNotTouchedWhenExplicit() {
+    @ParameterizedTest
+    @MethodSource("halfConstraintRecipes")
+    void halfConstraintNotTouchedWhenExplicit(Recipe toApply) {
         rewriteRun(
-                spec -> spec.recipe(new HalfConstraintRecipe()),
+                spec -> spec.recipe(toApply),
                 text(
                         """
                         rule R
@@ -71,10 +77,11 @@ class DrlMigrationRecipesTest implements RewriteTest {
         );
     }
 
-    @Test
-    void prefixesCustomOperator() {
+    @ParameterizedTest
+    @MethodSource("customOperatorRecipes")
+    void prefixesCustomOperator(Recipe toApply) {
         rewriteRun(
-                spec -> spec.recipe(new PrefixCustomOperatorRecipe()),
+                spec -> spec.recipe(toApply),
                 text(
                         """
                         rule R
@@ -94,10 +101,11 @@ class DrlMigrationRecipesTest implements RewriteTest {
         );
     }
 
-    @Test
-    void prefixesCustomOperatorComplex() {
+    @ParameterizedTest
+    @MethodSource("customOperatorRecipes")
+    void prefixesCustomOperatorComplex(Recipe toApply) {
         rewriteRun(
-                spec -> spec.recipe(new PrefixCustomOperatorRecipe()),
+                spec -> spec.recipe(toApply),
                 text(
                         """
                         rule R
@@ -119,10 +127,11 @@ class DrlMigrationRecipesTest implements RewriteTest {
         );
     }
 
-    @Test
-    void leavesBuiltInOperatorUntouched() {
+    @ParameterizedTest
+    @MethodSource("customOperatorRecipes")
+    void leavesBuiltInOperatorUntouched(Recipe toApply) {
         rewriteRun(
-                spec -> spec.recipe(new PrefixCustomOperatorRecipe()),
+                spec -> spec.recipe(toApply),
                 text(
                         """
                         rule R
@@ -135,10 +144,11 @@ class DrlMigrationRecipesTest implements RewriteTest {
         );
     }
 
-    @Test
-    void replacesLhsLogicalAndOr() {
+    @ParameterizedTest
+    @MethodSource("logicalRecipes")
+    void replacesLhsLogicalAndOr(Recipe toApply) {
         rewriteRun(
-                spec -> spec.recipe(new LhsLogicalOperatorRecipe()),
+                spec -> spec.recipe(toApply),
                 text(
                         """
                         rule R
@@ -158,10 +168,11 @@ class DrlMigrationRecipesTest implements RewriteTest {
         );
     }
 
-    @Test
-    void replacesLhsLogicalAndOrComplex() {
+    @ParameterizedTest
+    @MethodSource("logicalRecipes")
+    void replacesLhsLogicalAndOrComplex(Recipe toApply) {
         rewriteRun(
-                spec -> spec.recipe(new LhsLogicalOperatorRecipe()),
+                spec -> spec.recipe(toApply),
                 text(
                         """
                         rule R
@@ -183,10 +194,11 @@ class DrlMigrationRecipesTest implements RewriteTest {
         );
     }
 
-    @Test
-    void doesNotRewriteConstraintLogicalOperators() {
+    @ParameterizedTest
+    @MethodSource("logicalRecipes")
+    void doesNotRewriteConstraintLogicalOperators(Recipe toApply) {
         rewriteRun(
-                spec -> spec.recipe(new LhsLogicalOperatorRecipe()),
+                spec -> spec.recipe(toApply),
                 text(
                         """
                         rule R
@@ -199,10 +211,11 @@ class DrlMigrationRecipesTest implements RewriteTest {
         );
     }
 
-    @Test
-    void doesNotRewriteConstraintLogicalOperatorsComplex() {
+    @ParameterizedTest
+    @MethodSource("logicalRecipes")
+    void doesNotRewriteConstraintLogicalOperatorsComplex(Recipe toApply) {
         rewriteRun(
-                spec -> spec.recipe(new LhsLogicalOperatorRecipe()),
+                spec -> spec.recipe(toApply),
                 text(
                         """
                         rule R
@@ -215,10 +228,11 @@ class DrlMigrationRecipesTest implements RewriteTest {
         );
     }
 
-    @Test
-    void compositeRecipeAppliesAll() {
+    @ParameterizedTest
+    @MethodSource("migrationRecipes")
+    void compositeRecipeAppliesAll(Recipe toApply) {
         rewriteRun(
-                spec -> spec.recipe(new DrlMigrationRecipe()),
+                spec -> spec.recipe(toApply),
                 text(
                         """
                         rule R
@@ -240,10 +254,11 @@ class DrlMigrationRecipesTest implements RewriteTest {
         );
     }
 
-    @Test
-    void rewriteAgendaGroupAttribute() {
+    @ParameterizedTest
+    @MethodSource("regexRecipes")
+    void rewriteAgendaGroupAttribute(Recipe toApply) {
         rewriteRun(
-                spec -> spec.recipe(new AgendaGroupToRuleflowGroupRecipe()),
+                spec -> spec.recipe(toApply),
                 text(
                         """
                         rule R
@@ -260,6 +275,38 @@ class DrlMigrationRecipesTest implements RewriteTest {
                         end
                         """
                 )
+        );
+    }
+
+    static java.util.stream.Stream<Recipe> migrationRecipes() {
+        return java.util.stream.Stream.of(
+                new DrlMigrationRecipe(),
+                new AstDrlMigrationRecipe()
+        );
+    }
+
+    static java.util.stream.Stream<Recipe> regexRecipes() {
+        return java.util.stream.Stream.of(new DrlMigrationRecipe());
+    }
+
+    static java.util.stream.Stream<Recipe> halfConstraintRecipes() {
+        return java.util.stream.Stream.of(
+                new HalfConstraintRecipe(),
+                new org.drools.rewrite.drl.ast.AstHalfConstraintRecipe()
+        );
+    }
+
+    static java.util.stream.Stream<Recipe> customOperatorRecipes() {
+        return java.util.stream.Stream.of(
+                new PrefixCustomOperatorRecipe(),
+                new org.drools.rewrite.drl.ast.AstPrefixCustomOperatorRecipe()
+        );
+    }
+
+    static java.util.stream.Stream<Recipe> logicalRecipes() {
+        return java.util.stream.Stream.of(
+                new LhsLogicalOperatorRecipe(),
+                new org.drools.rewrite.drl.ast.AstLhsLogicalOperatorRecipe()
         );
     }
 }
