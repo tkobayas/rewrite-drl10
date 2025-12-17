@@ -59,12 +59,12 @@ public class PrefixCustomOperatorRecipe extends Recipe {
         StringBuilder out = new StringBuilder();
         int idx = 0;
         while (true) {
-            int whenIdx = indexOfWord(source, "when", idx);
+            int whenIdx = DrlTextUtils.indexOfWord(source, "when", idx);
             if (whenIdx < 0) {
                 out.append(source.substring(idx));
                 break;
             }
-            int thenIdx = indexOfWord(source, "then", whenIdx);
+            int thenIdx = DrlTextUtils.indexOfWord(source, "then", whenIdx);
             if (thenIdx < 0) {
                 out.append(source.substring(idx));
                 break;
@@ -99,14 +99,4 @@ public class PrefixCustomOperatorRecipe extends Recipe {
         return sb.toString();
     }
 
-    private static int indexOfWord(String text, String word, int fromIndex) {
-        int idx = text.toLowerCase().indexOf(word.toLowerCase(), fromIndex);
-        if (idx < 0) {
-            return -1;
-        }
-        boolean startOk = idx == 0 || !Character.isLetterOrDigit(text.charAt(idx - 1));
-        int endIdx = idx + word.length();
-        boolean endOk = endIdx >= text.length() || !Character.isLetterOrDigit(text.charAt(endIdx));
-        return (startOk && endOk) ? idx : -1;
-    }
 }

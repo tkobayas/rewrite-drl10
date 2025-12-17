@@ -48,12 +48,12 @@ public class LhsLogicalOperatorRecipe extends Recipe {
         StringBuilder result = new StringBuilder();
         int idx = 0;
         while (true) {
-            int whenIdx = indexOfWord(source, "when", idx);
+            int whenIdx = DrlTextUtils.indexOfWord(source, "when", idx);
             if (whenIdx < 0) {
                 result.append(source.substring(idx));
                 break;
             }
-            int thenIdx = indexOfWord(source, "then", whenIdx);
+            int thenIdx = DrlTextUtils.indexOfWord(source, "then", whenIdx);
             if (thenIdx < 0) {
                 result.append(source.substring(idx));
                 break;
@@ -135,16 +135,5 @@ public class LhsLogicalOperatorRecipe extends Recipe {
             }
         }
         return -1;
-    }
-
-    private static int indexOfWord(String text, String word, int fromIndex) {
-        int idx = text.toLowerCase().indexOf(word.toLowerCase(), fromIndex);
-        if (idx < 0) {
-            return -1;
-        }
-        // verify word boundary
-        boolean startOk = idx == 0 || !Character.isLetterOrDigit(text.charAt(idx - 1));
-        boolean endOk = idx + word.length() >= text.length() || !Character.isLetterOrDigit(text.charAt(idx + word.length()));
-        return (startOk && endOk) ? idx : -1;
     }
 }

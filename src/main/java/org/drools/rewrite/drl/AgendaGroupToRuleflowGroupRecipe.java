@@ -49,12 +49,12 @@ public class AgendaGroupToRuleflowGroupRecipe extends Recipe {
         StringBuilder out = new StringBuilder();
         int idx = 0;
         while (true) {
-            int ruleIdx = indexOfWord(source, "rule", idx);
+            int ruleIdx = DrlTextUtils.indexOfWord(source, "rule", idx);
             if (ruleIdx < 0) {
                 out.append(source.substring(idx));
                 break;
             }
-            int whenIdx = indexOfWord(source, "when", ruleIdx);
+            int whenIdx = DrlTextUtils.indexOfWord(source, "when", ruleIdx);
             if (whenIdx < 0) {
                 out.append(source.substring(idx));
                 break;
@@ -66,16 +66,5 @@ public class AgendaGroupToRuleflowGroupRecipe extends Recipe {
             idx = whenIdx;
         }
         return out.toString();
-    }
-
-    private static int indexOfWord(String text, String word, int fromIndex) {
-        int idx = text.toLowerCase().indexOf(word.toLowerCase(), fromIndex);
-        if (idx < 0) {
-            return -1;
-        }
-        boolean startOk = idx == 0 || !Character.isLetterOrDigit(text.charAt(idx - 1));
-        int endIdx = idx + word.length();
-        boolean endOk = endIdx >= text.length() || !Character.isLetterOrDigit(text.charAt(endIdx));
-        return (startOk && endOk) ? idx : -1;
     }
 }
