@@ -3,7 +3,6 @@ package org.drools.rewrite.drl;
 import org.openrewrite.ExecutionContext;
 import org.openrewrite.Recipe;
 import org.openrewrite.TreeVisitor;
-import org.openrewrite.marker.Markers;
 import org.openrewrite.text.PlainText;
 import org.openrewrite.text.PlainTextVisitor;
 
@@ -18,9 +17,9 @@ import java.util.regex.Pattern;
  * This is a heuristic token-level rewrite intended for DRL LHS constraints.
  */
 public class HalfConstraintRecipe extends Recipe {
-    // Matches "<lhs> <op> <rhs> <logical> == <rhs2>" with missing lhs in the second comparison.
+    // Matches "<lhs> <op> <rhs> <logical> <op> <rhs2>" with missing lhs in the second comparison.
     private static final Pattern HALF_CONSTRAINT = Pattern.compile(
-            "(?<lhs>[A-Za-z_][\\w\\.]*?)\\s*(?<op>==|!=|<=|>=|<|>)\\s*(?<rhs1>[^|&;\\n]+?)\\s*(?<logical>\\|\\||\\bor\\b)\\s*==\\s*(?<rhs2>[^|&;\\n]+)",
+            "(?<lhs>[A-Za-z_][\\w\\.]*)\\s*(?<op>==|!=|<=|>=|<|>)\\s*(?<rhs1>[^|&;\\n,]+?)\\s*(?<logical>\\|\\||\\bor\\b)\\s*(?<halfop>==|!=|<=|>=|<|>)\\s*(?<rhs2>[^|&;\\n,]+)",
             Pattern.CASE_INSENSITIVE);
 
     @Override
@@ -54,15 +53,47 @@ public class HalfConstraintRecipe extends Recipe {
     }
 
     private static String rewriteHalfConstraints(String source) {
-        Matcher matcher = HALF_CONSTRAINT.matcher(source);
-        StringBuffer sb = new StringBuffer();
-        while (matcher.find()) {
-            String lhs = matcher.group("lhs");
-            String logical = matcher.group("logical");
-            String replacement = matcher.group(0).replaceFirst("\\|\\|\\s*==", logical + " " + lhs + " ==");
-            matcher.appendReplacement(sb, Matcher.quoteReplacement(replacement));
+        StringBuilder out = new StringBuilder();
+        int idx = 0;
+        while (true) {
+            int whenIdx = DrlTextUtils.indexOfWord(source, "when", idx);
+            if (whenIdx < 0) {
+                out.append(source.substring(idx));
+                break;
+            }
+            int thenIdx = DrlTextUtils.indexOfWord(source, "then", whenIdx);
+            if (thenIdx < 0) {
+                out.append(source.substring(idx));
+                break;
+            }
+            out.append(source, idx, whenIdx + 4);
+            String lhsBlock = source.substring(whenIdx + 4, thenIdx);
+            out.append(rewriteWithinWhen(lhsBlock));
+            idx = thenIdx;
         }
-        matcher.appendTail(sb);
-        return sb.toString();
+        return out.toString();
+    }
+
+    private static String rewriteWithinWhen(String block) {
+        String current = block;
+        while (true) {
+            Matcher matcher = HALF_CONSTRAINT.matcher(current);
+            StringBuffer sb = new StringBuffer();
+            boolean changed = false;
+            while (matcher.find()) {
+                changed = true;
+                String lhs = matcher.group("lhs");
+                String logical = matcher.group("logical");
+                String halfop = matcher.group("halfop");
+                String replacement = matcher.group("lhs") + " " + matcher.group("op") + " " + matcher.group("rhs1") +
+                        " " + logical + " " + lhs + " " + halfop + " " + matcher.group("rhs2");
+                matcher.appendReplacement(sb, Matcher.quoteReplacement(replacement));
+            }
+            matcher.appendTail(sb);
+            if (!changed) {
+                return current;
+            }
+            current = sb.toString();
+        }
     }
 }

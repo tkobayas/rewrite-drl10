@@ -31,6 +31,31 @@ class DrlMigrationRecipesTest implements RewriteTest {
     }
 
     @Test
+    void halfConstraintComplex() {
+        rewriteRun(
+                spec -> spec.recipe(new HalfConstraintRecipe()),
+                text(
+                        """
+                        rule R
+                        when
+                            Person(name == "Mark" || == "Mario" || == "John",
+                                   age > 30 || < 20)
+                        then
+                        end
+                        """,
+                        """
+                        rule R
+                        when
+                            Person(name == "Mark" || name == "Mario" || name == "John",
+                                   age > 30 || age < 20)
+                        then
+                        end
+                        """
+                )
+        );
+    }
+
+    @Test
     void halfConstraintNotTouchedWhenExplicit() {
         rewriteRun(
                 spec -> spec.recipe(new HalfConstraintRecipe()),
@@ -62,6 +87,31 @@ class DrlMigrationRecipesTest implements RewriteTest {
                         rule R
                         when
                             Person(addresses ##supersetOf $alice.addresses)
+                        then
+                        end
+                        """
+                )
+        );
+    }
+
+    @Test
+    void prefixesCustomOperatorComplex() {
+        rewriteRun(
+                spec -> spec.recipe(new PrefixCustomOperatorRecipe()),
+                text(
+                        """
+                        rule R
+                        when
+                            Person(addresses supersetOf $alice.addresses,
+                                   orders subsetOf $bob.orders)
+                        then
+                        end
+                        """,
+                        """
+                        rule R
+                        when
+                            Person(addresses ##supersetOf $alice.addresses,
+                                   orders ##subsetOf $bob.orders)
                         then
                         end
                         """
@@ -109,6 +159,31 @@ class DrlMigrationRecipesTest implements RewriteTest {
     }
 
     @Test
+    void replacesLhsLogicalAndOrComplex() {
+        rewriteRun(
+                spec -> spec.recipe(new LhsLogicalOperatorRecipe()),
+                text(
+                        """
+                        rule R
+                        when
+                            (Person() && Pet())
+                            || (Car() && House())
+                        then
+                        end
+                        """,
+                        """
+                        rule R
+                        when
+                            (Person() and Pet())
+                            or (Car() and House())
+                        then
+                        end
+                        """
+                )
+        );
+    }
+
+    @Test
     void doesNotRewriteConstraintLogicalOperators() {
         rewriteRun(
                 spec -> spec.recipe(new LhsLogicalOperatorRecipe()),
@@ -117,6 +192,22 @@ class DrlMigrationRecipesTest implements RewriteTest {
                         rule R
                         when
                             Person(name == "Mark" || name == "Mario")
+                        then
+                        end
+                        """
+                )
+        );
+    }
+
+    @Test
+    void doesNotRewriteConstraintLogicalOperatorsComplex() {
+        rewriteRun(
+                spec -> spec.recipe(new LhsLogicalOperatorRecipe()),
+                text(
+                        """
+                        rule R
+                        when
+                            Person( (name == "Mark" && age > 30) || (name == "Mark" && age < 20) )
                         then
                         end
                         """

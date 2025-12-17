@@ -71,6 +71,8 @@ public class LhsLogicalOperatorRecipe extends Recipe {
         StringBuilder rewritten = new StringBuilder();
         boolean inString = false;
         char stringDelimiter = 0;
+        int parenDepth = 0;
+        java.util.Deque<Integer> argStack = new java.util.ArrayDeque<>();
         for (int i = 0; i < lhsSection.length(); i++) {
             char c = lhsSection.charAt(i);
             if (!inString && (c == '"' || c == '\'')) {
@@ -86,25 +88,41 @@ public class LhsLogicalOperatorRecipe extends Recipe {
                 continue;
             }
             if (c == '&' && i + 1 < lhsSection.length() && lhsSection.charAt(i + 1) == '&') {
-                if (looksLikePatternConnector(lhsSection, i)) {
+                if (looksLikePatternConnector(lhsSection, i, parenDepth, argStack.size())) {
                     rewritten.append("and");
                     i++; // skip next &
                     continue;
                 }
             }
             if (c == '|' && i + 1 < lhsSection.length() && lhsSection.charAt(i + 1) == '|') {
-                if (looksLikePatternConnector(lhsSection, i)) {
+                if (looksLikePatternConnector(lhsSection, i, parenDepth, argStack.size())) {
                     rewritten.append("or");
                     i++; // skip next |
                     continue;
                 }
             }
             rewritten.append(c);
+            if (c == '(') {
+                parenDepth++;
+                int prev = previousNonWhitespaceSameLine(lhsSection, i - 1);
+                if (prev >= 0 && Character.isLetterOrDigit(lhsSection.charAt(prev))) {
+                    argStack.push(parenDepth);
+                }
+            } else if (c == ')') {
+                if (!argStack.isEmpty() && argStack.peek() == parenDepth) {
+                    argStack.pop();
+                }
+                parenDepth = Math.max(0, parenDepth - 1);
+            }
         }
         return rewritten.toString();
     }
 
-    private static boolean looksLikePatternConnector(String text, int opIndex) {
+    private static boolean looksLikePatternConnector(String text, int opIndex, int parenDepth, int argDepth) {
+        // Avoid rewriting connectors deep inside constraint expressions (e.g., inside pattern argument lists).
+        if (parenDepth > 1 || argDepth > 0) {
+            return false;
+        }
         int prev = previousNonWhitespace(text, opIndex - 1);
         int next = nextNonWhitespace(text, opIndex + 2);
         if (prev < 0 || next < 0) {
@@ -131,6 +149,19 @@ public class LhsLogicalOperatorRecipe extends Recipe {
     private static int nextNonWhitespace(String text, int from) {
         for (int i = from; i < text.length(); i++) {
             if (!Character.isWhitespace(text.charAt(i))) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private static int previousNonWhitespaceSameLine(String text, int from) {
+        for (int i = from; i >= 0; i--) {
+            char c = text.charAt(i);
+            if (c == '\n' || c == '\r') {
+                return -1;
+            }
+            if (!Character.isWhitespace(c)) {
                 return i;
             }
         }
