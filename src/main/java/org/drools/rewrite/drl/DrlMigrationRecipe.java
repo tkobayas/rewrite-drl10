@@ -21,6 +21,9 @@ public class DrlMigrationRecipe extends Recipe {
     @Option(displayName = "Replace &&/|| in LHS", description = "Replace infix logical operators in LHS pattern composition with textual and/or.", required = false)
     boolean replaceLhsLogicalInfix = true;
 
+    @Option(displayName = "Rewrite agenda-group to ruleflow-group", description = "DRL10 uses ruleflow-group; rewrite legacy agenda-group attributes.", required = false)
+    boolean rewriteAgendaGroup = true;
+
     @Override
     public String getDisplayName() {
         return "Migrate DRL syntax to DRL 10";
@@ -41,7 +44,8 @@ public class DrlMigrationRecipe extends Recipe {
         return Arrays.asList(
                 rewriteHalfConstraints ? new HalfConstraintRecipe() : null,
                 prefixCustomOperators ? new PrefixCustomOperatorRecipe() : null,
-                replaceLhsLogicalInfix ? new LhsLogicalOperatorRecipe() : null
+                replaceLhsLogicalInfix ? new LhsLogicalOperatorRecipe() : null,
+                rewriteAgendaGroup ? new AgendaGroupToRuleflowGroupRecipe() : null
         ).stream().filter(r -> r != null).toList();
     }
 }

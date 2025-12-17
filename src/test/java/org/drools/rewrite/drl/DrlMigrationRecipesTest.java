@@ -131,6 +131,7 @@ class DrlMigrationRecipesTest implements RewriteTest {
                 text(
                         """
                         rule R
+                        agenda-group "legacy"
                         when
                             Person(name == "Mark" || == "Mario") || Person(addresses supersetOf $alice.addresses)
                         then
@@ -138,8 +139,32 @@ class DrlMigrationRecipesTest implements RewriteTest {
                         """,
                         """
                         rule R
+                        ruleflow-group "legacy"
                         when
                             Person(name == "Mark" || name == "Mario") or Person(addresses ##supersetOf $alice.addresses)
+                        then
+                        end
+                        """
+                )
+        );
+    }
+
+    @Test
+    void rewriteAgendaGroupAttribute() {
+        rewriteRun(
+                spec -> spec.recipe(new AgendaGroupToRuleflowGroupRecipe()),
+                text(
+                        """
+                        rule R
+                        agenda-group "legacy"
+                        when
+                        then
+                        end
+                        """,
+                        """
+                        rule R
+                        ruleflow-group "legacy"
+                        when
                         then
                         end
                         """
