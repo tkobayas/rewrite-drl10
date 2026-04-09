@@ -16,7 +16,7 @@ public class AstDrlMigrationRecipe extends Recipe {
 
     @Override
     public String getDescription() {
-        return "Token-based DRL 10 migrations (agenda-group, half-constraints, custom operators, logical operators) on LHS.";
+        return "Token-based DRL 10 migrations (agenda-group, half-constraints, custom operators, logical operators, LHS annotations).";
     }
 
     @Override
@@ -30,7 +30,8 @@ public class AstDrlMigrationRecipe extends Recipe {
                 new AstAgendaGroupRecipe(),
                 new AstHalfConstraintRecipe(),
                 new AstLhsLogicalOperatorRecipe(),
-                new AstPrefixCustomOperatorRecipe()
+                new AstPrefixCustomOperatorRecipe(),
+                new AstLhsAnnotationRecipe()
         );
     }
 }

@@ -254,6 +254,52 @@ class DrlMigrationRecipesTest implements RewriteTest {
 
     @ParameterizedTest
     @MethodSource("migrationRecipes")
+    void dropsAnnotationsInsideLhsPatterns(Recipe toApply) {
+        rewriteRun(
+                spec -> spec.recipe(toApply),
+                text(
+                        """
+                        rule R
+                        when
+                            ( Double()
+                              or @Annot1 String()
+                              or @Annot2 Integer() )
+                        then
+                        end
+                        """,
+                        """
+                        rule R
+                        when
+                            ( Double()
+                              or String()
+                              or Integer() )
+                        then
+                        end
+                        """
+                )
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("migrationRecipes")
+    void keepsTrailingPatternAnnotations(Recipe toApply) {
+        rewriteRun(
+                spec -> spec.recipe(toApply),
+                text(
+                        """
+                        rule R
+                        when
+                            String() @watch(!*, age)
+                            Integer()
+                        then
+                        end
+                        """
+                )
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("migrationRecipes")
     void compositeRecipeAppliesAll(Recipe toApply) {
         rewriteRun(
                 spec -> spec.recipe(toApply),

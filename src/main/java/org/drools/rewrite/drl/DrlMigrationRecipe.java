@@ -2,6 +2,7 @@ package org.drools.rewrite.drl;
 
 import org.openrewrite.Option;
 import org.openrewrite.Recipe;
+import org.drools.rewrite.drl.ast.AstLhsAnnotationRecipe;
 
 import java.time.Duration;
 import java.util.Arrays;
@@ -24,6 +25,9 @@ public class DrlMigrationRecipe extends Recipe {
     @Option(displayName = "Rewrite agenda-group to ruleflow-group", description = "DRL10 uses ruleflow-group; rewrite legacy agenda-group attributes.", required = false)
     boolean rewriteAgendaGroup = true;
 
+    @Option(displayName = "Drop operator-position annotations in LHS", description = "Remove annotations between LHS logical operators and the following expression, which DRL10 no longer supports.", required = false)
+    boolean dropLhsAnnotations = true;
+
     @Override
     public String getDisplayName() {
         return "Migrate DRL syntax to DRL 10";
@@ -31,7 +35,7 @@ public class DrlMigrationRecipe extends Recipe {
 
     @Override
     public String getDescription() {
-        return "Normalizes legacy DRL syntax (half-constraints, custom operators, infix logical ops) to DRL 10-compatible forms.";
+        return "Normalizes legacy DRL syntax (half-constraints, custom operators, infix logical ops, LHS annotations) to DRL 10-compatible forms.";
     }
 
     @Override
@@ -45,7 +49,8 @@ public class DrlMigrationRecipe extends Recipe {
                 rewriteHalfConstraints ? new HalfConstraintRecipe() : null,
                 prefixCustomOperators ? new PrefixCustomOperatorRecipe() : null,
                 replaceLhsLogicalInfix ? new LhsLogicalOperatorRecipe() : null,
-                rewriteAgendaGroup ? new AgendaGroupToRuleflowGroupRecipe() : null
+                rewriteAgendaGroup ? new AgendaGroupToRuleflowGroupRecipe() : null,
+                dropLhsAnnotations ? new AstLhsAnnotationRecipe() : null
         ).stream().filter(r -> r != null).toList();
     }
 }
