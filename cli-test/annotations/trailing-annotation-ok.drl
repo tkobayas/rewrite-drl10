@@ -1,0 +1,6 @@
+rule "Trailing Pattern Annotation Is Valid"
+when
+    String() @watch(!*, age)
+    Integer()
+then
+end

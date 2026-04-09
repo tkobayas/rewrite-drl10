@@ -15,6 +15,7 @@
         <antlr4.version>4.13.2</antlr4.version>
         <junit.version>5.10.2</junit.version>
         <slf4j.version>1.7.36</slf4j.version>
+        <slf4j.simple.version>1.7.32</slf4j.simple.version>
     </properties>
 
     <dependencyManagement>
@@ -52,6 +53,12 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j.simple.version}</version>
+            <scope>runtime</scope>
         </dependency>
 
         <dependency>
@@ -111,6 +118,27 @@
                 <configuration>
                     <useModulePath>false</useModulePath>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>org.drools.rewrite.drl.cli.DrlMigrationCli</mainClass>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>

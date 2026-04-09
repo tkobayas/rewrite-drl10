@@ -1,0 +1,13 @@
+rule "Legacy Customer Segments"
+agenda-group "customers"
+when
+    Person(name == "Mark" || == "Mario")
+    Person(addresses supersetOf $alice.addresses)
+then
+end
+
+rule "Legacy Customer Pattern Join"
+when
+    (Person() && Pet())
+then
+end

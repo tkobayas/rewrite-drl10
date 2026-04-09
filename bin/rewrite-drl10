@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+JAR_PATH="${PROJECT_DIR}/target/rewrite-drl10-1.0.0-SNAPSHOT.jar"
+
+if [[ ! -f "${JAR_PATH}" ]]; then
+  mvn -q -DskipTests package -f "${PROJECT_DIR}/pom.xml"
+fi
+
+exec java -Dorg.slf4j.simpleLogger.defaultLogLevel=warn -jar "${JAR_PATH}" "$@"

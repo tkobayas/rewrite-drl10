@@ -1,0 +1,7 @@
+rule "Already Migrated"
+ruleflow-group "ready"
+when
+    Person(name == "Mark" || name == "Mario") or Person(addresses ##supersetOf $alice.addresses)
+    String() @watch(!*, age)
+then
+end

@@ -1,0 +1,9 @@
+rule "Legacy Orders"
+agenda-group "orders"
+when
+    Order(total > 100 || == 500)
+    ( Double()
+      or @Annot1 String()
+      or @Annot2 Integer() )
+then
+end
