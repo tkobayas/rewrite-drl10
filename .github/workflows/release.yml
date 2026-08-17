@@ -1,0 +1,33 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Set version from tag
+        run: mvn -q versions:set -DnewVersion=${GITHUB_REF_NAME#v} -DgenerateBackupPoms=false
+
+      - name: Build and test
+        run: mvn -B package
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: target/rewrite-drl10-*.jar
+          fail_on_unmatched_files: true
+          generate_release_notes: true

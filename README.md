@@ -9,8 +9,8 @@ The migration currently covers:
 - custom operators without the `##` prefix
 - half constraints
 - `agenda-group` to `ruleflow-group`
-- LHS `&&` to `and`
-- LHS `||` to `or`
+- LHS `&&` to `and` (`&&` in constraint expressions is preserved)
+- LHS `||` to `or` (`||` in constraint expressions is preserved)
 - annotations between LHS logical operators and the following expression
 
 Example of the last case:
