@@ -35,22 +35,12 @@ Trailing pattern annotations are preserved:
 String() @watch(!*, age)
 ```
 
-## Build
+## Usage
 
-Build the executable jar:
-
-```bash
-mvn -DskipTests package
-```
-
-The wrapper script below will also build it automatically if needed.
-
-## CLI Usage
-
-Run the CLI through the wrapper:
+Download the latest JAR from [GitHub Releases](https://github.com/tkobayas/rewrite-drl10/releases) and run:
 
 ```bash
-./bin/rewrite-drl10 migrate <path>
+java -jar rewrite-drl10-1.0.0.jar migrate <path>
 ```
 
 `<path>` may be either:
@@ -61,11 +51,13 @@ Run the CLI through the wrapper:
 Examples:
 
 ```bash
-./bin/rewrite-drl10 migrate ./cli-test --dry-run
-./bin/rewrite-drl10 migrate ./cli-test
-./bin/rewrite-drl10 migrate ./cli-test --backup-dir /tmp/drl-backups
-./bin/rewrite-drl10 migrate ./cli-test --no-backup
+java -jar rewrite-drl10-1.0.0.jar migrate ./rules --dry-run
+java -jar rewrite-drl10-1.0.0.jar migrate ./rules
+java -jar rewrite-drl10-1.0.0.jar migrate ./rules --backup-dir /tmp/drl-backups
+java -jar rewrite-drl10-1.0.0.jar migrate ./rules --no-backup
 ```
+
+Requires Java 17 or later.
 
 ## Options
 
@@ -79,9 +71,17 @@ By default, backups are created under a timestamped directory next to the target
 .rewrite-drl10-backups/<timestamp>/<target-name>/...
 ```
 
+## Build from Source
+
+```bash
+mvn package
+```
+
+This produces a fat JAR at `target/rewrite-drl10-1.0.0-SNAPSHOT.jar`.
+
 ## Example Test Data
 
-Sample DRL files are available under [`cli-test/`](/home/tkobayas/usr/work/incubator-kie-drools-6224-migration-script/rewrite-drl10/cli-test):
+Sample DRL files are available under `cli-test/`:
 
 - `cli-test/customers/legacy-customer-rules.drl`
 - `cli-test/orders/nested/legacy-order-rules.drl`
@@ -91,8 +91,8 @@ Sample DRL files are available under [`cli-test/`](/home/tkobayas/usr/work/incub
 Try:
 
 ```bash
-./bin/rewrite-drl10 migrate ./cli-test --dry-run
-./bin/rewrite-drl10 migrate ./cli-test
+java -jar target/rewrite-drl10-1.0.0-SNAPSHOT.jar migrate ./cli-test --dry-run
+java -jar target/rewrite-drl10-1.0.0-SNAPSHOT.jar migrate ./cli-test
 ```
 
 ## Output

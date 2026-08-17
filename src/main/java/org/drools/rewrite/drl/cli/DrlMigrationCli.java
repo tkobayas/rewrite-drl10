@@ -183,12 +183,12 @@ public final class DrlMigrationCli {
 
     private static void printUsage() {
         System.out.println("Usage:");
-        System.out.println("  rewrite-drl10 migrate <path> [--dry-run] [--no-backup] [--backup-dir <dir>]");
+        System.out.println("  java -jar rewrite-drl10.jar migrate <path> [--dry-run] [--no-backup] [--backup-dir <dir>]");
         System.out.println();
         System.out.println("Examples:");
-        System.out.println("  rewrite-drl10 migrate ./rules");
-        System.out.println("  rewrite-drl10 migrate ./src/main/resources --dry-run");
-        System.out.println("  rewrite-drl10 migrate ./rules --backup-dir /tmp/drl-backups");
+        System.out.println("  java -jar rewrite-drl10.jar migrate ./rules");
+        System.out.println("  java -jar rewrite-drl10.jar migrate ./src/main/resources --dry-run");
+        System.out.println("  java -jar rewrite-drl10.jar migrate ./rules --backup-dir /tmp/drl-backups");
     }
 
     private record CliOptions(Path target, boolean dryRun, boolean backupEnabled, Path backupDir) {
